@@ -45,3 +45,81 @@ DRIVER_UNLOAD msr_unload;
 #pragma alloc_text(PAGE, msr_ctrl)
 #endif
 
+
+NTSTATUS
+DriverEntry(PDRIVER_OBJECT DriverObject,
+			PUNICODE_STRING RegistryPath)
+{
+	NTSTATUS status = STATUS_SUCCESS;
+	UNICODE_STRING dev_name;
+	UNICODE_STRING symlink_name;
+	PDEVICE_OBJECT msr_dev_obj = NULL;
+
+	UNREFERENCED_PARAMETER(RegistryPath);
+
+	RtlInitUnicodeString(&dev_name, MSR_NT_DEV_NAME);
+	RtlInitUnicodeString(&symlink_name, MSR_DOS_DEV_NAME);
+
+	status = IoCreateDevice(DriverObject,
+							0,
+							&dev_name,
+							FILE_DEVICE_UNKNOWN,
+							FILE_DEVICE_SECURE_OPEN,
+							&msr_dev_obj);
+
+	if (!NT_SUCCESS(status))
+		return status;
+
+	DriverObject->MajorFuncion[IRP_MJ_CREATE] = msr_create;
+	DriverObject->MajorFuncion[IRP_MJ_CLOSE] = msr_close;
+	DriverObject->MajorFuncion[IRP_MJ_DEVICE_CONTROL] = msr_ctrl;
+
+	DriverObject->DriverUnload = msr_unload;
+
+	IoCreateSymbolicLink(&symlink_name, &dev_name);
+	return status;
+}
+
+
+NTSTATUS msr_create(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+{
+    UNREFERENCED_PARAMETER(DeviceObject);
+
+    PAGED_CODE();
+
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    Irp->IoStatus.Information = 0;
+
+	IoCompleteRequest(Irp, IO_NO_INCREMENT);
+
+	return STATUS_SUCCESS;
+}
+
+
+NTSTATUS msr_close(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+{
+    UNREFERENCED_PARAMETER(DeviceObject);
+
+    PAGED_CODE();
+
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    Irp->IoStatus.Information = 0;
+
+	IoCompleteRequest(Irp, IO_NO_INCREMENT);
+
+	return STATUS_SUCCESS;
+}
+
+VOID msr_unload(PDRIVER_OBJECT DriverObject)
+{
+	PDEVICE_OBJECT dev_obj = DriverObject->DeviceObject;
+	UNICODE_STRING symlink_name;
+
+	PAGED_CODE();
+
+	RtlInitUnicodeString(&symlink_name, MSR_DOS_DEV_NAME);
+	IoDeleteSymbolicLink(&symlink_name);
+
+	if (dev_obj) 
+		IoDeleteDevice(dev_obj);
+}
