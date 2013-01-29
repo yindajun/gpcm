@@ -37,4 +37,11 @@ DRIVER_DISPATCH msr_ctrl;
 
 DRIVER_UNLOAD msr_unload;
 
+#ifde ALLOC_PRAGMA
+#pragma alloc_text(INIT, DriverEntry)
+#pragma alloc_text(PAGE, msr_unload)
+#pragma alloc_text(PAGE, msr_create)
+#pragma alloc_text(PAGE, msr_close)
+#pragma alloc_text(PAGE, msr_ctrl)
+#endif
 
