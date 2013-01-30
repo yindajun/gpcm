@@ -37,7 +37,7 @@ DRIVER_DISPATCH msr_ctrl;
 
 DRIVER_UNLOAD msr_unload;
 
-#ifde ALLOC_PRAGMA
+#ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
 #pragma alloc_text(PAGE, msr_unload)
 #pragma alloc_text(PAGE, msr_create)
@@ -65,14 +65,15 @@ DriverEntry(PDRIVER_OBJECT DriverObject,
 							&dev_name,
 							FILE_DEVICE_UNKNOWN,
 							FILE_DEVICE_SECURE_OPEN,
+							FALSE,
 							&msr_dev_obj);
 
 	if (!NT_SUCCESS(status))
 		return status;
 
-	DriverObject->MajorFuncion[IRP_MJ_CREATE] = msr_create;
-	DriverObject->MajorFuncion[IRP_MJ_CLOSE] = msr_close;
-	DriverObject->MajorFuncion[IRP_MJ_DEVICE_CONTROL] = msr_ctrl;
+	DriverObject->MajorFunction[IRP_MJ_CREATE] = msr_create;
+	DriverObject->MajorFunction[IRP_MJ_CLOSE] = msr_close;
+	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = msr_ctrl;
 
 	DriverObject->DriverUnload = msr_unload;
 
@@ -122,4 +123,12 @@ VOID msr_unload(PDRIVER_OBJECT DriverObject)
 
 	if (dev_obj) 
 		IoDeleteDevice(dev_obj);
+}
+
+NTSTATUS msr_ctrl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+{
+	NTSTATUS status = STATUS_SUCCESS;
+	
+
+	return status;
 }
