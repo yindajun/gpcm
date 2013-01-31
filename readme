@@ -2,3 +2,6 @@ Gpu Performance Counter Monitor
 
 drv:
 	windows driver for msr read and write library
+
+instdrv:
+	install gpcm driver tools

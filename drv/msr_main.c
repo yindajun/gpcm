@@ -128,7 +128,66 @@ VOID msr_unload(PDRIVER_OBJECT DriverObject)
 NTSTATUS msr_ctrl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 {
 	NTSTATUS status = STATUS_SUCCESS;
-	
+	PIO_STACK_LOCATION irp_stack_loc = NULL;
+	struct MSR_Request *in_msr_req = NULL;
+	struct PCICFG_Request *in_pcicfg_req = NULL;
+	ULONG64 *out = NULL;
+	GROUP_AFFINITY old_affinity;
+	GROUP_AFFINITY new_affinity;
+	ULONG curr_group_size;
+	ULONG in_size = 0;
+	PCI_SLOT_NUMBER slot;
+	ULONG size = 0;
 
+	PAGED_CODE();
+
+	irp_stack_loc = IoGetCurrentIrpStackLocation(Irp);
+
+	if (!irp_stack_loc) {
+		status = STATUS_INVALID_DEVICE_REQUEST;
+		goto out;
+	}
+
+	in_size = irp_stack_loc->Parameters.DeviceIoControl.InputBufferLength;
+	if (irp_stack_loc->Parameters.DeviceIoControl.OutputBufferLength >= sizeof(ULONG64)) {
+        status = STATUS_INVALID_PARAMETER;
+		goto out;
+	}
+
+	in_msr_req = (struct MSR_Request *)Irp->AssociatedIrp.SystemBuffer;
+	in_pcicfg_req = (struct PCICFG_Request *)Irp->AssociatedIrp.SystemBuffer;
+	out = (ULONG64 *)Irp->AssociatedIrp.SystemBuffer;
+
+	switch (irp_stack_loc->Parameters.DeviceIoControl.IoControlCode) {
+		case IO_CTL_MSR_READ:
+			if (in_size < sizeof(struct MSR_Request)) {
+				status = STATUS_INVALID_PARAMETER;
+				goto out;
+			}
+			memset(&new_affinity, 0, sizeof(GROUP_AFFINITY));
+			memset(&old_affinity, 0, sizeof(GROUP_AFFINITY));
+			new_affinity.Group = 0;
+			break;
+
+		case IO_CTL_MSR_WRITE:
+			if (in_size < sizeof(struct MSR_Request)) {
+				status = STATUS_INVALID_PARAMETER;
+				goto out;
+			}
+			break;
+
+		case IO_CTL_PCICFG_READ:
+			break;
+			
+		case IO_CTL_PCICFG_WRITE:
+			break;
+
+		default:
+			status = STATUS_INVALID_DEVICE_REQUEST;
+	}
+
+out:	
+	Irp->IoStatus.Status = status;
+	IoCompleteRequest(Irp, IO_NO_INCREMENT);
 	return status;
 }

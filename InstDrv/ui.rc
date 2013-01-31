@@ -1,0 +1,66 @@
+#include <winres.h>
+#include "resource.h"
+
+
+//#define IDD_INSTDRV                     101
+//#define IDI_ICON1                       103
+//#define IDC_START                       1001
+//#define IDC_INSTALL                     1002
+//#define IDC_STOP                        1003
+//#define IDC_REMOVE                      1004
+//#define IDC_SRVNAME                     1005
+//#define IDC_DRVPATH                     1006
+//#define IDC_ERROR                       1007
+//#define IDC_STATE                       1007
+
+
+//LANGUAGE 0, 0
+
+
+IDI_ICON               ICON                    "id.ico"
+
+IDD_INSTDRV DIALOG 20,20,200,80
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME | DS_3DLOOK
+CAPTION "InstDrv"
+FONT 8, "MS Sans Serif"
+BEGIN
+	LTEXT		"Full pathname of driver",-1,8,6,180,8,WS_GROUP
+	EDITTEXT	IDC_SRVNAME,8,16,180,12,WS_BORDER | ES_AUTOHSCROLL |SS_NOTIFY
+	PUSHBUTTON	"Install",IDC_INSTALL,8,30,45,14,0
+	PUSHBUTTON	"Start",IDC_START,53,30,45,14,0
+	PUSHBUTTON	"Stop",IDC_STOP,98,30,45,14,0
+	PUSHBUTTON	"Remove",IDC_REMOVE,143,30,45,14,0
+	LTEXT		"Status:",-1,8,46,32,8,WS_GROUP
+	LTEXT		"",IDC_STATE,42,46,110,8,WS_GROUP
+	PUSHBUTTON	"Close",IDC_CLOSE,143,60,45,14,0
+END
+
+STRINGTABLE DISCARDABLE
+BEGIN
+	0	"Operation was successful"
+	3	"Path not found"
+	5	"Access denied"
+	6	"Invalid handle"
+	52	"Display name already exists"
+	87	"Invalid Parameter"
+	123	"Invalid service name"
+	1051	"Dependent services running"
+	1052	"Invalid service control code"
+	1053	"Service timed out"
+	1054	"Couldn't create thread"
+	1055	"The database is locked"
+	1056	"Service already running"
+	1057	"User account doesn't exist"
+	1058	"Service has been disabled"
+	1059	"Circular dependency"
+	1060	"Service doesn't exist"
+	1061	"Service can't accept control"
+	1062	"Service hasn't been started"
+	1065	"Database doesn't exist"
+	1068	"Depends on service that failed"
+	1069	"Service couldn't be logged on"
+	1072	"Service marked for deletion"
+	1073	"Service already exists"
+	1075	"Depends on nonexistant service"
+	9999	"An unexpected error occured"
+END
