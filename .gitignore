@@ -168,3 +168,7 @@ InstDrv/ui.res
 drv/buildchk_win7_x86.log
 drv/objchk_win7_x86/
 
+.gitattributes
+.gitignore
+
+
