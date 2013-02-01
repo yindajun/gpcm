@@ -15,6 +15,7 @@ static TCHAR szFilter[] = TEXT ("Driver Files (*.SYS)\0*.sys\0")
                           TEXT ("All Files (*.*)\0*.*\0\0");
 
 static TCHAR szFileName[MAX_PATH]; 
+static TCHAR szServiceName[MAX_PATH]; 
 static TCHAR szTitleName [MAX_PATH];
 
 
@@ -80,13 +81,16 @@ INT_PTR CALLBACK DlgProc(HWND hwndDlg,
 	HDC hdc;
 	HICON hIcon;
 	char msg[MAX_PATH];
+	char *str_lv;
 	switch (uMsg) {
 		case WM_INITDIALOG:
 			CentreDialog(hwndDlg);
 
 			hIcon = LoadIcon(g_hInst, (LPCTSTR)IDI_ICON);
 			SetWindowIcon(hwndDlg, hIcon);
+			g_hwndDlg = hwndDlg;
 
+			InstDrvInit();
 			break;
 
 		case WM_CLOSE:
@@ -96,13 +100,63 @@ INT_PTR CALLBACK DlgProc(HWND hwndDlg,
 		case WM_COMMAND:
 			switch (LOWORD(wParam)) {
 				case IDC_INSTALL:
+					GetDlgItemText(hwndDlg, IDC_SRVNAME, szFileName, MAX_PATH);
+					if (lstrlen(szFileName) == 0) {
+						SetDlgItemText(hwndDlg, IDC_STATE, "[InstDrv]Please fill in the blank driver file name");
+						return FALSE;
+					}
+					str_lv = strrchr(szFileName, '\\');
+					strcpy(szServiceName, ++str_lv);
+					*strrchr(szServiceName, '.') = 0;
+
+					if (0 == InstDrvInstall(szServiceName, szFileName))
+						SetDlgItemText(hwndDlg, IDC_STATE, "[InstDrv]Install service success");
 					break;
+
 				case IDC_START:
+					GetDlgItemText(hwndDlg, IDC_SRVNAME, szFileName, MAX_PATH);
+					if (lstrlen(szFileName) == 0) {
+						SetDlgItemText(hwndDlg, IDC_STATE, "[InstDrv]Please fill in the blank driver file name");
+						return FALSE;
+					}
+
+					str_lv = strrchr(szFileName, '\\');
+					strcpy(szServiceName, ++str_lv);
+					*strrchr(szServiceName, '.') = 0;
+					if (0 == InstDrvStart(szServiceName, szFileName))
+						SetDlgItemText(hwndDlg, IDC_STATE, "[InstDrv]Start service success");
 					break;
+
 				case IDC_STOP:
+					GetDlgItemText(hwndDlg, IDC_SRVNAME, szFileName, MAX_PATH);
+					if (lstrlen(szFileName) == 0) {
+						SetDlgItemText(hwndDlg, IDC_STATE, "[InstDrv]Please fill in the blank driver file name");
+						return FALSE;
+					}
+
+					str_lv = strrchr(szFileName, '\\');
+					strcpy(szServiceName, ++str_lv);
+					*strrchr(szServiceName, '.') = 0;
+					if (0 == InstDrvStart(szServiceName, szFileName))
+						SetDlgItemText(hwndDlg, IDC_STATE, "[InstDrv]Stop service success");
 					break;
+
 				case IDC_REMOVE:
+					GetDlgItemText(hwndDlg, IDC_SRVNAME, szFileName, MAX_PATH);
+					if (lstrlen(szFileName) == 0) {
+						SetDlgItemText(hwndDlg, IDC_STATE, "[InstDrv]Please fill in the blank driver file name");
+						return FALSE;
+					}
+
+					str_lv = strrchr(szFileName, '\\');
+					strcpy(szServiceName, ++str_lv);
+					*strrchr(szServiceName, '.') = 0;
+					if (0 == InstDrvRemove(szServiceName, szFileName))
+						SetDlgItemText(hwndDlg, IDC_STATE, "[InstDrv]Remove service success");
+
+					InstDrvInit();
 					break;
+
 				case IDC_SRVNAME:
 					//hdc = GetDC(NULL);
 					//line += 20;
